@@ -10,10 +10,7 @@ const startCoords = {
 
 class Connection {
   constructor({
-    startPointSelector,
-    middlePointSelector,
-    endPointSelector,
-    lineSelector,
+    fieldSelector,
     minX = 0,
     maxX = 500,
     minY = 0,
@@ -23,6 +20,7 @@ class Connection {
     middle,
     end
   }) {
+    this.field = document.querySelector(fieldSelector);
     this.coords = { start, middle, end };
     this.config = { minX, maxX, minY, maxY };
     this.applyStart = this.applyStart.bind(this);
@@ -31,9 +29,9 @@ class Connection {
     this.handleStartPositionChange = this.handleStartPositionChange.bind(this);
     this.handleMiddlePositionChange = this.handleMiddlePositionChange.bind(this);
     this.handleEndPositionChange = this.handleEndPositionChange.bind(this);
-    this.line = new Line(lineSelector, this.coords);
+    this.line = new Line(this.field, this.coords);
     this.startPoint = new Point(
-      startPointSelector,
+      this.field,
       {
         positionChangeCallback: this.handleStartPositionChange
       },
@@ -42,7 +40,7 @@ class Connection {
       initialY: start.y,
     });
     this.middlePoint = new Point(
-      middlePointSelector,
+      this.field,
       {
         positionChangeCallback: this.handleMiddlePositionChange
       },
@@ -51,7 +49,7 @@ class Connection {
       initialY: middle.y,
     });
     this.endPoint = new Point(
-      endPointSelector,
+      this.field,
       {
         positionChangeCallback: this.handleEndPositionChange
       },
@@ -127,10 +125,7 @@ class Connection {
 }
 
 const connection = new Connection({
-  startPointSelector: '#svg-start',
-  middlePointSelector: '#svg-middle',
-  endPointSelector: '#svg-end',
-  lineSelector: '#svg-line'
+  fieldSelector: '.svg'
 }, startCoords);
 
 console.log(connection.startPoint.x);

@@ -1,10 +1,10 @@
 export default class Line {
-  constructor(elementSelector, {
+  constructor(fieldElement, {
     start = 0,
     middle = 0,
     end = 0
   } = {}) {
-    this.element = document.querySelector(elementSelector);
+    this.element = this._initElement(fieldElement);
     this.coords = { start, middle, end };
     this.applyStart = this.applyStart.bind(this);
     this.applyMiddle = this.applyMiddle.bind(this);
@@ -13,9 +13,21 @@ export default class Line {
     this._applyCoords();
   }
 
+  _initElement(fieldElement) {
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+
+    line.setAttribute('stroke', 'orange');
+    line.setAttribute('fill', 'none');
+    line.setAttribute('stroke-width', 5);
+
+    fieldElement.appendChild(line);
+
+    return line;
+  }
+
   _applyCoords() {
     const { start, end, middle } = this.coords;
-    const path = `M ${start.x} ${start.y} Q ${middle.x} ${middle.y} ${end.x} ${
+    const path = `M ${start.x},${start.y} Q ${middle.x} ${middle.y} ${end.x} ${
       end.y
     }`;
 

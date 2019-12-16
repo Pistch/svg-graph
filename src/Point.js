@@ -1,19 +1,19 @@
 export default class Point {
   constructor(
-    elementSelector,
+    fieldElement,
     {
       positionChangeCallback
     },
     {
-      delta = -10,
+      radius = 10,
       initialX = 0,
       initialY = 0
     } = {}
   ) {
-    this.element = document.querySelector(elementSelector);
+    this.config = { radius };
+    this.element = this._initElement(fieldElement);
     this.name = name;
     this.positionChangeCallback = positionChangeCallback;
-    this.config = { delta };
 
     this.isHolding = false;
 
@@ -24,6 +24,22 @@ export default class Point {
     this.y = initialY;
   }
 
+  _initElement(fieldElement) {
+    const point = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+
+    point.setAttribute('stroke', 'black');
+    point.setAttribute('fill', 'black');
+    point.setAttribute('stroke-width', 1);
+    point.setAttribute('cx', this.config.radius);
+    point.setAttribute('cy', this.config.radius);
+    point.setAttribute('r', this.config.radius);
+    point.style.cursor = 'pointer';
+
+    fieldElement.appendChild(point);
+
+    return point;
+  }
+
   get x() {
     return this._x;
   }
@@ -31,7 +47,7 @@ export default class Point {
   set x(value) {
     this._x = value;
 
-    this.element.setAttribute('x', value + this.config.delta);
+    this.element.setAttribute('cx', value);
   }
 
   get y() {
@@ -41,7 +57,7 @@ export default class Point {
   set y(value) {
     this._y = value;
 
-    this.element.setAttribute('y', value + this.config.delta);
+    this.element.setAttribute('cy', value);
   }
 
   _applyCoords({ x, y }) {
