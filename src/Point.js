@@ -19,7 +19,7 @@ export default class Point {
 
     this.handleMouseUp = this.handleMouseUp.bind(this);
     this.handleMouseMove = this.handleMouseMove.bind(this);
-    this.element.addEventListener("mousedown", this.handleMouseDown.bind(this));
+    this.element.addEventListener('mousedown', this.handleMouseDown.bind(this));
     this.x = initialX;
     this.y = initialY;
   }
@@ -31,7 +31,7 @@ export default class Point {
   set x(value) {
     this._x = value;
 
-    this.element.setAttribute("x", value + this.config.delta);
+    this.element.setAttribute('x', value + this.config.delta);
   }
 
   get y() {
@@ -41,7 +41,7 @@ export default class Point {
   set y(value) {
     this._y = value;
 
-    this.element.setAttribute("y", value + this.config.delta);
+    this.element.setAttribute('y', value + this.config.delta);
   }
 
   _applyCoords({ x, y }) {
@@ -61,17 +61,15 @@ export default class Point {
       y: event.clientY - elementBoundaries.y
     };
 
-    console.log(event.clientX, event.clientY, elementBoundaries);
-
-    window.addEventListener("mouseup", this.handleMouseUp);
-    window.addEventListener("mousemove", this.handleMouseMove);
+    window.addEventListener('mouseup', this.handleMouseUp);
+    window.addEventListener('mousemove', this.handleMouseMove);
   }
 
   handleMouseUp() {
     this.isHolding = false;
 
-    window.removeEventListener("mouseup", this.handleMouseUp);
-    window.removeEventListener("mousemove", this.handleMouseMove);
+    window.removeEventListener('mouseup', this.handleMouseUp);
+    window.removeEventListener('mousemove', this.handleMouseMove);
   }
 
   handleMouseMove(event) {
