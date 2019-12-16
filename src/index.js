@@ -1,141 +1,136 @@
-import "./styles.css";
+import Point from './Point';
+import Line from './Line';
+import './styles.css';
 
-const coords = {
+const startCoords = {
   start: { x: 80, y: 50 },
   middle: { x: 100, y: 100 },
   end: { x: 450, y: 450 }
 };
 
-class Point {
-  constructor(
-    name,
-    element,
-    { delta = -10, minX = 0, maxX = 500, minY = 0, maxY = 500 } = {}
-  ) {
-    this.element = element;
-    this.name = name;
-    this.config = {
-      delta,
-      minX,
-      maxX,
-      minY,
-      maxY
-    };
-
-    this.isHolding = false;
-
-    this.handleMouseUp = this.handleMouseUp.bind(this);
-    this.handleMouseMove = this.handleMouseMove.bind(this);
-    this.element.addEventListener("mousedown", this.handleMouseDown.bind(this));
+class Connection {
+  constructor({
+    startPointSelector,
+    middlePointSelector,
+    endPointSelector,
+    lineSelector,
+    minX = 0,
+    maxX = 500,
+    minY = 0,
+    maxY = 500
+  }, {
+    start,
+    middle,
+    end
+  }) {
+    this.coords = { start, middle, end };
+    this.config = { minX, maxX, minY, maxY };
+    this.applyStart = this.applyStart.bind(this);
+    this.applyMiddle = this.applyMiddle.bind(this);
+    this.applyEnd = this.applyEnd.bind(this);
+    this.handleStartPositionChange = this.handleStartPositionChange.bind(this);
+    this.handleMiddlePositionChange = this.handleMiddlePositionChange.bind(this);
+    this.handleEndPositionChange = this.handleEndPositionChange.bind(this);
+    this.line = new Line(lineSelector, this.coords);
+    this.startPoint = new Point(
+      startPointSelector,
+      {
+        positionChangeCallback: this.handleStartPositionChange
+      },
+      {
+      initialX: start.x,
+      initialY: start.y,
+    });
+    this.middlePoint = new Point(
+      middlePointSelector,
+      {
+        positionChangeCallback: this.handleMiddlePositionChange
+      },
+      {
+      initialX: middle.x,
+      initialY: middle.y,
+    });
+    this.endPoint = new Point(
+      endPointSelector,
+      {
+        positionChangeCallback: this.handleEndPositionChange
+      },
+      {
+      initialX: end.x,
+      initialY: end.y,
+    });
   }
 
-  get x() {
-    return this.element.x;
+  applyStart({ x, y }) {
+    this.coords.start = { x, y };
+
+    this.startPoint.applyCoords(this.coords.start);
+    this.line.applyStart(this.coords.start);
   }
 
-  set x(value) {
-    this.element.setAttribute("x", value + this.config.delta);
+  applyMiddle({ x, y }) {
+    this.coords.middle = { x, y };
+
+    this.middlePoint.applyCoords(this.coords.middle);
+    this.line.applyMiddle(this.coords.middle);
   }
 
-  get y() {
-    return this.element.y;
+  applyEnd({ x, y }) {
+    this.coords.end = { x, y };
+
+    this.endPoint.applyCoords(this.coords.end);
+    this.line.applyEnd(this.coords.end);
   }
 
-  set y(value) {
-    this.element.setAttribute("y", value + this.config.delta);
-  }
+  _normalizeCoords(event) {
+    const fieldParams = document.querySelector('.svg').getBoundingClientRect();
+    let x = event.clientX;
 
-  _applyCoords({ x, y }) {
-    this.x = x;
-    this.y = y;
-  }
-
-  applyCoords({ x, y }) {
-    coords[this.name] = { x, y };
-    this._applyCoords({ x, y });
-    applyCoords(coords);
-  }
-
-  _setInitialCoords(event) {
-    this.initialClientCoords = {
-      x: event.clientX,
-      y: event.clientY
-    };
-  }
-
-  handleMouseDown(event) {
-    this.isHolding = true;
-    this._setInitialCoords(event);
-
-    window.addEventListener("mouseup", this.handleMouseUp);
-    window.addEventListener("mousemove", this.handleMouseMove);
-  }
-
-  handleMouseUp() {
-    this.isHolding = false;
-
-    window.removeEventListener("mouseup", this.handleMouseUp);
-    window.removeEventListener("mousemove", this.handleMouseMove);
-  }
-
-  handleMouseMove(event) {
-    if (!this.isHolding) {
-      return;
+    if (x < fieldParams.left) {
+      x = fieldParams.left;
     }
 
-    let x = coords[this.name].x - this.initialClientCoords.x + event.clientX;
-
-    if (x < this.config.minX) {
-      x = this.config.minX;
+    if (x > fieldParams.right) {
+      x = fieldParams.right;
     }
 
-    if (x > this.config.maxX) {
-      x = this.config.maxX;
+    let y = event.clientY;
+
+    if (y < fieldParams.top) {
+      y = fieldParams.top;
     }
 
-    let y = coords[this.name].y - this.initialClientCoords.y + event.clientY;
-
-    if (y < this.config.minY) {
-      y = this.config.minY;
+    if (y > fieldParams.bottom) {
+      y = fieldParams.bottom;
     }
 
-    if (y > this.config.maxY) {
-      y = this.config.maxY;
-    }
+    return { x, y };
+  }
 
-    this.applyCoords({ x, y });
-    this._setInitialCoords(event);
+  handleStartPositionChange(event) {
+    const { x, y } = this._normalizeCoords(event);
 
-    console.log(field.clientTop);
-    console.log(field.clientLeft);
+    this.applyStart({ x, y });
+  }
+
+  handleMiddlePositionChange(event) {
+    const { x, y } = this._normalizeCoords(event);
+
+    this.applyMiddle({ x, y });
+  }
+
+  handleEndPositionChange(event) {
+    const { x, y } = this._normalizeCoords(event);
+
+    this.applyEnd({ x, y });
   }
 }
 
-const startPointEl = document.getElementById("svg-start");
-const middlePointEl = document.getElementById("svg-middle");
-const endPointEl = document.getElementById("svg-end");
+const connection = new Connection({
+  startPointSelector: '#svg-start',
+  middlePointSelector: '#svg-middle',
+  endPointSelector: '#svg-end',
+  lineSelector: '#svg-line'
+}, startCoords);
 
-const startPoint = new Point("start", startPointEl);
-const middlePoint = new Point("middle", middlePointEl);
-const endPoint = new Point("end", endPointEl);
-const line = document.getElementById("svg-line");
-const field = document.querySelector("svg");
-
-function applyCoords(newCoords) {
-  const { start, end, middle } = newCoords;
-  const path = `M ${start.x} ${start.y} Q ${middle.x} ${middle.y} ${end.x} ${
-    end.y
-  }`;
-
-  line.setAttribute("d", path);
-}
-
-function init() {
-  const { start, end, middle } = coords;
-
-  startPoint.applyCoords(start);
-  middlePoint.applyCoords(middle);
-  endPoint.applyCoords(end);
-}
-
-init();
+console.log(connection.startPoint.x);
