@@ -2,20 +2,15 @@ import Point from './Point';
 import Line from './Line';
 
 export default class Connection {
-  constructor({
-    fieldSelector,
-    minX = 0,
-    maxX = 500,
-    minY = 0,
-    maxY = 500
-  }, {
+  constructor({ fieldSelector }, {
     start,
     middle,
     end
   }) {
     this.field = document.querySelector(fieldSelector);
+    this._makeConfig = this._makeConfig.bind(this);
+    this._makeConfig();
     this.coords = { start, middle, end };
-    this.config = { minX, maxX, minY, maxY };
     this.applyStart = this.applyStart.bind(this);
     this.applyMiddle = this.applyMiddle.bind(this);
     this.applyEnd = this.applyEnd.bind(this);
@@ -50,6 +45,19 @@ export default class Connection {
         initialX: end.x,
         initialY: end.y,
       });
+
+    window.addEventListener('resize', this._makeConfig);
+  }
+
+  _makeConfig() {
+    const fieldParams = this.field.getBoundingClientRect();
+
+    this.config = {
+      minX: fieldParams.left,
+      maxX: fieldParams.right,
+      minY: fieldParams.top,
+      maxY: fieldParams.bottom
+    };
   }
 
   applyStart({ x, y }) {
@@ -74,25 +82,24 @@ export default class Connection {
   }
 
   _normalizeCoords(event) {
-    const fieldParams = this.field.getBoundingClientRect();
     let x = event.clientX;
 
-    if (x < fieldParams.left) {
-      x = fieldParams.left;
+    if (x < this.config.minX) {
+      x = this.config.minX;
     }
 
-    if (x > fieldParams.right) {
-      x = fieldParams.right;
+    if (x > this.config.maxX) {
+      x = this.config.maxX;
     }
 
     let y = event.clientY;
 
-    if (y < fieldParams.top) {
-      y = fieldParams.top;
+    if (y < this.config.minY) {
+      y = this.config.minY;
     }
 
-    if (y > fieldParams.bottom) {
-      y = fieldParams.bottom;
+    if (y > this.config.maxY) {
+      y = this.config.maxY;
     }
 
     return { x, y };
