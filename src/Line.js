@@ -9,6 +9,7 @@ export default class Line {
     this.applyStart = this.applyStart.bind(this);
     this.applyMiddle = this.applyMiddle.bind(this);
     this.applyEnd = this.applyEnd.bind(this);
+    this.__applyCoords = this.__applyCoords.bind(this);
 
     this._applyCoords();
   }
@@ -26,6 +27,14 @@ export default class Line {
   }
 
   _applyCoords() {
+    if (this._raf) {
+      cancelAnimationFrame(this._raf);
+    }
+
+    this._raf = requestAnimationFrame(this.__applyCoords);
+  }
+
+  __applyCoords() {
     const { start, end, middle } = this.coords;
     const path = `M ${start.x},${start.y} Q ${middle.x} ${middle.y} ${end.x} ${
       end.y

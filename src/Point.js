@@ -60,9 +60,17 @@ export default class Point {
     this.element.setAttribute('cy', value);
   }
 
-  _applyCoords({ x, y }) {
+  __applyCoords({ x, y }) {
     this.x = x;
     this.y = y;
+  }
+
+  _applyCoords({ x, y }) {
+    if (this._raf) {
+      cancelAnimationFrame(this._raf);
+    }
+
+    this._raf = requestAnimationFrame(this.__applyCoords.bind(this, { x, y }));
   }
 
   applyCoords({ x, y }) {
